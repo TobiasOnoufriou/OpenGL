@@ -132,6 +132,11 @@ project "OpenGL-Core"
 		"_CRT_SECURE_NO_WARNINGS"
 	}
 
+  libdirs
+  {
+    "lib"
+  }
+
 	includedirs
 	{
 		"src",
@@ -152,7 +157,8 @@ project "OpenGL-Core"
 		"GLFW",
 		"Glad",
 		"ImGui",
-		"opengl32.lib"
+    "assimp-vc142-mtd",
+		"opengl32.lib",
 	}
 
 	filter "system:windows"

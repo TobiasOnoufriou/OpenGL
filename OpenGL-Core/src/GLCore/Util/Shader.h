@@ -21,6 +21,6 @@ namespace GLCore::Utils {
 		GLuint CompileShader(GLenum type, const std::string& source);
 	private:
 		GLuint m_RendererID;
-	};
+  };
 
 }

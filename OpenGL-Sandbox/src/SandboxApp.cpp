@@ -1,5 +1,5 @@
 #include "GLCore.h"
-#include "SandboxLayer.h"
+#include "SandboxLayer.hpp"
 
 using namespace GLCore;
 
