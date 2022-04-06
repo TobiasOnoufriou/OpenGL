@@ -7,7 +7,7 @@
 namespace GLCore::Utils {
 
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
-		: m_AspectRatio(aspectRatio), m_Camera(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel), m_Rotation(rotation)
+		: m_AspectRatio(aspectRatio), m_Camera(45, m_AspectRatio, 0.1f, 100.0f), m_Rotation(rotation)
 	{
     m_Camera.SetDirection(glm::vec3{
       cos(vertical_angle_) * sin(horizontal_angle_),
