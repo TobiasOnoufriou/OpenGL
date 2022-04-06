@@ -7,7 +7,7 @@
 namespace GLCore::Utils {
 
 	OrthographicCameraController::OrthographicCameraController(float aspectRatio, bool rotation)
-		: m_AspectRatio(aspectRatio), m_Camera(-m_AspectRatio * m_ZoomLevel, m_AspectRatio * m_ZoomLevel, -m_ZoomLevel, m_ZoomLevel), m_Rotation(rotation)
+		: m_AspectRatio(aspectRatio), m_Camera(45, m_AspectRatio, 0.1f, 100.0f), m_Rotation(rotation)
 	{
     m_Camera.SetDirection(glm::vec3{
       cos(vertical_angle_) * sin(horizontal_angle_),
@@ -32,31 +32,19 @@ namespace GLCore::Utils {
 		if (Input::IsKeyPressed(HZ_KEY_A))
 		{
       m_CameraPosition -= m_Camera.GetRight() * m_CameraTranslationSpeed * float(ts);
-
-			//m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
-			//m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_D))
 		{
       m_CameraPosition += m_Camera.GetRight() * m_CameraTranslationSpeed * float(ts);
-
-			//m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
-			//m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
 
 		if (Input::IsKeyPressed(HZ_KEY_W))
 		{
       m_CameraPosition += m_Camera.GetDirection() * m_CameraTranslationSpeed * float(ts);
-
-			//m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
-			//m_CameraPosition.z += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
 		else if (Input::IsKeyPressed(HZ_KEY_S))
 		{
       m_CameraPosition -= m_Camera.GetDirection() * m_CameraTranslationSpeed * float(ts);
-
-      //m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
-			//m_CameraPosition.z -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
 		}
 
     if (Input::IsKeyPressed(HZ_KEY_LEFT_ALT)) {

@@ -7,7 +7,7 @@ namespace GLCore::Utils {
 	class OrthographicCamera
 	{
 	public:
-		OrthographicCamera(float left, float right, float bottom, float top);
+		OrthographicCamera(float FoV, float aspect, float min_unit, float max_unit);
 
 		void SetProjection(float FoV, float aspect, float min_unit, float max_unit);
 
