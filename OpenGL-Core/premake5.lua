@@ -150,6 +150,7 @@ project "OpenGL-Core"
 		"%{IncludeDir.assimp}/contrib/irrXML",
 		"%{IncludeDir.assimp}/contrib/zlib",
 		"%{IncludeDir.assimp}/contrib/rapidjson/include",
+    "%{IncludeDir.eigen}/Eigen"
 	}
 
 	links 

@@ -19,6 +19,10 @@ public:
 	virtual void OnImGuiRender() override;
 private:
   std::unique_ptr<ModelLoader> model_loader_;
+  std::vector<std::unique_ptr<Mesh>> mesh_;
+
+  glm::vec3 velocity = { 0.1f, 0.0f, -0.1f };
+
   GLCore::Utils::Shader* shader_;
   GLCore::Utils::OrthographicCameraController camera_controller_;
 };

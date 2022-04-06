@@ -3,6 +3,8 @@
 #pragma once
 #include "GLCore.h"
 
+#include "math_headers.h"
+
 #include <string>
 #include <vector>
 
@@ -29,10 +31,24 @@ class Mesh{
     );
   ~Mesh();
   void Draw(GLuint shaderId);
+  void ChangeVertexPosition(glm::vec3 pos, int index);
+  void GenerateParticleList(unsigned int system_dimension, unsigned int vertex);
   void SetupMesh();
  private:
   std::vector<Vertex> vertices_;
   std::vector<GLuint> indices_;
   std::vector<Texture> textures_;
-  GLuint vbo_, ebo_, vao_; //I think the ebo_ is the ibo_
+
+  VectorX current_positions_;
+  VectorX current_velocities_;
+  SparseMatrix mass_matrix_;
+  SparseMatrix inv_mass_matrix_;
+  SparseMatrix identity_matrix_;
+
+  SparseMatrix mass_matrix_1d_;
+  SparseMatrix identity_matrix_1d_;
+
+  unsigned int system_dimension_;
+
+  GLuint vbo_, ebo_, vao_;
 };

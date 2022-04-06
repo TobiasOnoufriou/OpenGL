@@ -18,6 +18,8 @@ void SandboxLayer::OnAttach()
 	EnableGLDebugging();
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glLineWidth(1);
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   shader_ = Shader::FromGLSLTextFiles(
@@ -26,7 +28,10 @@ void SandboxLayer::OnAttach()
   );
 
   model_loader_ = std::make_unique<ModelLoader>("src/assets/monkey.obj", false);// std::make_unique<ModelLoader>("src/assets/backpack.obj", false);
-	// In this function all call for model and file name is needed
+  mesh_.push_back(std::move(model_loader_->LoadModel("src/assets/monkey.obj")));
+
+  // Mesh push back after creation within sandbox layer.
+// In this function all call for model and file name is needed
 	// Init here
 }
 
@@ -39,6 +44,14 @@ void SandboxLayer::OnEvent(Event& event)
 {
   camera_controller_.OnEvent(event);
   EventDispatcher dispatcher(event);
+  dispatcher.Dispatch<MouseButtonPressedEvent>(
+    [&](MouseButtonPressedEvent& e)
+    {
+      this->mesh_.at(0)->ChangeVertexPosition(velocity, 1);
+      return false;
+    });
+
+
 	// Events here
 }
 
@@ -57,7 +70,8 @@ void SandboxLayer::OnUpdate(Timestep ts)
   int location = glGetUniformLocation(shader_->GetRendererID(), "u_ViewProjection");
   glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(this->camera_controller_.GetCamera().GetViewProjectionMatrix()));
 
-  model_loader_->Draw(shader_->GetRendererID());
+  this->mesh_.at(0)->Draw(shader_->GetRendererID());
+  //model_loader_->Draw(shader_->GetRendererID());
 }
 
 void SandboxLayer::OnImGuiRender()
