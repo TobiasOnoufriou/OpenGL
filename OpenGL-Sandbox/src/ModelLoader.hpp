@@ -16,19 +16,20 @@ class ModelLoader {
  public:
   ModelLoader(std::string const& path, bool gamma);
   ~ModelLoader();
-  bool LoadModel(std::string const& path);
+  std::unique_ptr<Mesh>& LoadModel(std::string const& path);
   void ProcessNode(aiNode* node, const aiScene* kScene);
-  Mesh ProcessMesh(aiMesh* mesh, const aiScene* kScene);
+  void ProcessMesh(aiMesh* mesh, const aiScene* kScene);
   void ExpandModel();
   std::vector<Texture> LoadMaterialTextures(
      aiMaterial* mat,
      aiTextureType type,
      std::string typeName);
   unsigned int TextureFromFile(const std::string& path, const std::string& directory, bool gamma);
-
   void Draw(GLuint shader_id);
+
+
  private:
-  std::vector<Mesh> meshes_;
+  std::unique_ptr<Mesh> meshes_;
   std::vector<Texture> textures_loaded_;
   std::string directory_;
   bool gamme_correction_;

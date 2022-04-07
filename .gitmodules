@@ -17,3 +17,6 @@
 [submodule "OpenGL-Tests/vendor"]
 	path = OpenGL-Tests/vendor
 	url = https://github.com/google/googletest.git
+[submodule "OpenGL-Core/vendor/eigen"]
+	path = OpenGL-Core/vendor/eigen
+	url = https://gitlab.com/libeigen/eigen.git

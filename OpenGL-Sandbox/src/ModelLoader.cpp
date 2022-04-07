@@ -1,11 +1,13 @@
 // Copyright 2022 Tobias Onoufriou
 #include "ModelLoader.hpp"
 
+#include "math_headers.h"
+
 ModelLoader::ModelLoader(
   std::string const& path,
   bool gamma = false):
   gamme_correction_(gamma) {
-    LoadModel(path);
+    //LoadModel(path);
 }
 
 ModelLoader::~ModelLoader() {
@@ -13,14 +15,15 @@ ModelLoader::~ModelLoader() {
 }
 
 void ModelLoader::Draw(GLuint shader_id) {
-  for (unsigned int i = 0; i < meshes_.size(); i++)
-    meshes_[i].Draw(shader_id);
+    meshes_->Draw(shader_id);
+    this->ExpandModel();
 }
 
 void ModelLoader::ExpandModel() {
+
 }
 
-bool ModelLoader::LoadModel(std::string const& path) {
+std::unique_ptr<Mesh>& ModelLoader::LoadModel(std::string const& path) {
   const aiScene* kScene = aiImportFile(path.c_str(),
     aiProcess_Triangulate | aiProcess_FlipUVs
     );
@@ -30,24 +33,24 @@ bool ModelLoader::LoadModel(std::string const& path) {
     AI_SCENE_FLAGS_INCOMPLETE ||
     !kScene->mRootNode) {
     std::cout << "ERROR::ASSIMP:: " << std::endl;
-    return false;
+    return std::unique_ptr<Mesh>(nullptr);
   }
   directory_ = path.substr(0, path.find_last_of('/'));
 
   this->ProcessNode(kScene->mRootNode, kScene);
-  return true;
+  return meshes_;
 }
 
 void ModelLoader::ProcessNode(aiNode* node, const aiScene* kScene) {
   if (node->mMeshes == nullptr) {
     aiMesh* mesh = kScene->mMeshes[0];
-    this->meshes_.push_back(ProcessMesh(mesh, kScene));
+    ProcessMesh(mesh, kScene);
   }
   else {
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
       //unsigned int index = node->mMeshes[i];
       aiMesh* mesh = kScene->mMeshes[node->mMeshes[i]];
-      this->meshes_.push_back(ProcessMesh(mesh, kScene));
+      ProcessMesh(mesh, kScene);
     }
   }
   
@@ -58,14 +61,18 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* kScene) {
   }
 }
 
-Mesh ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* kScene) {
+void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* kScene) {
   std::vector<Vertex> vertices;
   std::vector<unsigned int> indices;
   std::vector<Texture> textures;
 
+  unsigned int system_dimensions_ = mesh->mNumVertices * 3;
+
   for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
     Vertex vertex;
     glm::vec3 vector;
+
+    //Use Eigen to assign current positions.
     // positions
     vector.x = mesh->mVertices[i].x;
     vector.y = mesh->mVertices[i].y;
@@ -119,7 +126,8 @@ Mesh ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* kScene) {
   std::vector<Texture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
   textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
-  return Mesh(vertices, indices, textures);
+  meshes_ = std::make_unique<Mesh>(vertices, indices, textures);
+  meshes_->GenerateParticleList(system_dimensions_, mesh->mNumVertices);
 }
 
 unsigned int ModelLoader::TextureFromFile(std::string const& path, const std::string& directory, bool gamma) {

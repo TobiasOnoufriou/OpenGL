@@ -10,7 +10,8 @@ project "OpenGL-Sandbox"
 	files
 	{
 		"src/**.h",
-		"src/**.cpp"
+		"src/**.cpp",
+    "src/**.hpp"
 	}
 
   libdirs 
@@ -30,6 +31,7 @@ project "OpenGL-Sandbox"
 		"%{IncludeDir.assimp}/contrib/irrXML",
 		"%{IncludeDir.assimp}/contrib/zlib",
 		"%{IncludeDir.assimp}/contrib/rapidjson/include",
+    "../OpenGL-Core/%{IncludeDir.eigen}/Eigen"
 	}
 
   defines 

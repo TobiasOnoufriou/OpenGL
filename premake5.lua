@@ -24,6 +24,7 @@ IncludeDir["ImGui"] = "vendor/imgui"
 IncludeDir["glm"] = "vendor/glm"
 IncludeDir["stb_image"] = "vendor/stb_image"
 IncludeDir["assimp"] = "vendor/assimp"
+IncludeDir["eigen"] = "vendor/eigen"
 
 -- Projects
 group "Dependencies"
@@ -63,6 +64,7 @@ IncludeDir["ImGui"] = "vendor/imgui"
 IncludeDir["glm"] = "vendor/glm"
 IncludeDir["stb_image"] = "vendor/stb_image"
 IncludeDir["assimp"] = "vendor/assimp"
+IncludeDir["eigen"] = "vendor/eigen"
 
 -- Projects
 group "Dependencies"
