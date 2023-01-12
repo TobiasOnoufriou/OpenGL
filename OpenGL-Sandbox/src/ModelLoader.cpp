@@ -3,29 +3,25 @@
 
 #include "math_headers.h"
 
+
+ModelLoader::ModelLoader() {
+
+}
+
 ModelLoader::ModelLoader(
   std::string const& path,
   bool gamma = false):
   gamme_correction_(gamma) {
-    //LoadModel(path);
+    LoadModel(path);
 }
 
 ModelLoader::~ModelLoader() {
 
 }
 
-void ModelLoader::Draw(GLuint shader_id) {
-    meshes_->Draw(shader_id);
-    this->ExpandModel();
-}
-
-void ModelLoader::ExpandModel() {
-
-}
-
 std::unique_ptr<Mesh>& ModelLoader::LoadModel(std::string const& path) {
-  const aiScene* kScene = aiImportFile(path.c_str(),
-    aiProcess_Triangulate | aiProcess_FlipUVs
+  kScene = aiImportFile(path.c_str(),
+    aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace
     );
 
   if (!kScene ||
@@ -35,9 +31,17 @@ std::unique_ptr<Mesh>& ModelLoader::LoadModel(std::string const& path) {
     std::cout << "ERROR::ASSIMP:: " << std::endl;
     return std::unique_ptr<Mesh>(nullptr);
   }
+  
   directory_ = path.substr(0, path.find_last_of('/'));
 
   this->ProcessNode(kScene->mRootNode, kScene);
+
+
+  if (meshes_->GetCollider()) {
+    //CenterAndScale(&vertices[0].position, sizeof(Vertex), vertices.size(), 0);
+    meshes_->CalculateBoundingVolume();
+  }
+
   return meshes_;
 }
 
@@ -46,13 +50,15 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* kScene) {
     aiMesh* mesh = kScene->mMeshes[0];
     ProcessMesh(mesh, kScene);
   }
+  
+  
   else {
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
       //unsigned int index = node->mMeshes[i];
       aiMesh* mesh = kScene->mMeshes[node->mMeshes[i]];
       ProcessMesh(mesh, kScene);
     }
-  }
+  } 
   
   if (node->mNumChildren > 0) {
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
@@ -60,6 +66,8 @@ void ModelLoader::ProcessNode(aiNode* node, const aiScene* kScene) {
     }
   }
 }
+
+
 
 void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* kScene) {
   std::vector<Vertex> vertices;
@@ -93,19 +101,21 @@ void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* kScene) {
       vec.y = mesh->mTextureCoords[0][i].y;
       vertex.tex_coords = vec;
       // tangent
-      //vector.x = mesh->mTangents[i].x;
-      //vector.y = mesh->mTangents[i].y;
-      //vector.z = mesh->mTangents[i].z;
-      //vertex.tangent = vector;
-      // bitangent
-      //vector.x = mesh->mBitangents[i].x;
-      //vector.y = mesh->mBitangents[i].y;
-      //vector.z = mesh->mBitangents[i].z;
-      //vertex.bitangent = vector;
-    }
-    else
+      if (mesh->HasTangentsAndBitangents()) {
+        vector.x = mesh->mTangents[i].x;
+        vector.y = mesh->mTangents[i].y;
+        vector.z = mesh->mTangents[i].z;
+        vertex.tangent = vector;
+        
+        // bitangent
+        vector.x = mesh->mBitangents[i].x;
+        vector.y = mesh->mBitangents[i].y;
+        vector.z = mesh->mBitangents[i].z;
+        vertex.bitangent = vector;
+      }
+    } else {
       vertex.tex_coords = glm::vec2(0.0f, 0.0f);
-
+    }
     vertices.push_back(vertex);
   }
   for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
@@ -114,6 +124,8 @@ void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* kScene) {
     for (unsigned int j = 0; j < face.mNumIndices; j++)
       indices.push_back(face.mIndices[j]);
   }
+  
+  
   aiMaterial* material = kScene->mMaterials[mesh->mMaterialIndex];
 
 
@@ -129,6 +141,35 @@ void ModelLoader::ProcessMesh(aiMesh* mesh, const aiScene* kScene) {
   meshes_ = std::make_unique<Mesh>(vertices, indices, textures);
   meshes_->GenerateParticleList(system_dimensions_, mesh->mNumVertices);
 }
+
+template<typename Vec>
+std::pair<Vec, Vec> ModelLoader::GetExtents(const Vec* pts, size_t stride, size_t count){
+  unsigned char* base = (unsigned char*)pts;
+  Vec pmin(*(Vec*)base);
+  Vec pmax(*(Vec*)base);
+
+  for (size_t i = 0; i < count; ++i, base += stride) {
+    const Vec& pt = *(Vec*)base;
+    pmin = glm::min(pmin, pt);
+    pmax = glm::max(pmax, pt);
+  }
+  return std::make_paiz(pmin, pmax);
+}
+
+template<typename Vec>
+void ModelLoader::CenterAndScale(Vec* pts, size_t stride, size_t count, const typename Vec::value_type& size) {
+  typedef typename Vec::value_type Scalar;
+
+  std::pair<Vec, Vec> exts = GetExtents(pts, stride, count);
+
+  const Vec center = (exts.first * Scalar(0.5f)) + (exts.second * Scalar(0.5f));
+
+  meshes_->c = center;
+  meshes_->pMin = exts.first;
+  meshes_->pMax = exts.second;
+}
+
+
 
 unsigned int ModelLoader::TextureFromFile(std::string const& path, const std::string& directory, bool gamma) {
   std::string filename = std::string(path);

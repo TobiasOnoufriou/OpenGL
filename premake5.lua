@@ -65,6 +65,7 @@ IncludeDir["glm"] = "vendor/glm"
 IncludeDir["stb_image"] = "vendor/stb_image"
 IncludeDir["assimp"] = "vendor/assimp"
 IncludeDir["eigen"] = "vendor/eigen"
+IncludeDir["gltf"] = "vendor/gltf"
 
 -- Projects
 group "Dependencies"

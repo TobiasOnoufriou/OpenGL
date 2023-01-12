@@ -8,6 +8,8 @@
 #include "../Events/ApplicationEvent.h"
 
 #include "Timestep.h"
+#include "Constants.h"
+
 
 #include "../ImGui/ImGuiLayer.h"
 
@@ -16,7 +18,7 @@ namespace GLCore {
 	class Application
 	{
 	public:
-		Application(const std::string& name = "OpenGL Sandbox", uint32_t width = 1280, uint32_t height = 720);
+		Application(const std::string& name = WINDOW_NAME, uint32_t width = WINDOW_WIDTH, uint32_t height = WINDOW_HEIGHT);
 		virtual ~Application() = default;
 
 		void Run();

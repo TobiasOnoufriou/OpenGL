@@ -21,6 +21,7 @@ project "OpenGL-Sandbox"
 
 	includedirs
 	{
+    "../OpenGL-Core/vendor/gltf",
 		"../OpenGL-Core/vendor/spdlog/include",
 		"../OpenGL-Core/src",
 		"../OpenGL-Core/vendor",

@@ -4,12 +4,14 @@
 #include <GLCoreUtils.h>
 
 #include "ModelLoader.hpp"
+#include "LineTools.h"
+#include "Ray.h"
 
 
 class SandboxLayer : public GLCore::Layer
 {
 public:
-	SandboxLayer();
+	SandboxLayer(uint32_t w, uint32_t h);
 	virtual ~SandboxLayer();
 
 	virtual void OnAttach() override;
@@ -19,10 +21,16 @@ public:
 	virtual void OnImGuiRender() override;
 private:
   std::unique_ptr<ModelLoader> model_loader_;
-  std::vector<std::unique_ptr<Mesh>> mesh_;
+  std::unique_ptr<Mesh> mesh_;
+  std::unique_ptr<Mesh> plane_;
+  std::unique_ptr<LineTools> line_;
 
+  const aiScene* kScene; // Current Scene.
+  
   glm::vec3 velocity = { 0.1f, 0.0f, -0.1f };
 
   GLCore::Utils::Shader* shader_;
-  GLCore::Utils::OrthographicCameraController camera_controller_;
+  GLCore::Utils::PerspectiveCameraController camera_controller_;
+
+  uint32_t width, height;
 };

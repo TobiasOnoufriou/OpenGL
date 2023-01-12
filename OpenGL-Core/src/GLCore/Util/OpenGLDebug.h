@@ -3,6 +3,7 @@
 #include <glad/glad.h>
 
 #include "GLCore/Core/Log.h"
+#include "glm/vec3.hpp"
 
 namespace GLCore::Utils {
 
@@ -13,6 +14,7 @@ namespace GLCore::Utils {
 
 	void EnableGLDebugging();
 	void SetGLDebugLogLevel(DebugLogLevel level);
+  void PrintVector(glm::vec3 m);
 	void OpenGLLogMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
 
 }

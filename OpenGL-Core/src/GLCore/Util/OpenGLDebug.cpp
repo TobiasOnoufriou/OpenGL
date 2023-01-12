@@ -44,4 +44,8 @@ namespace GLCore::Utils {
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	}
 
+  void PrintVector(glm::vec3 m) {
+    std::cout << "x: " << m.x << " y: " << m.y << " z: " << m.z << std::endl;
+  }
+
 }
