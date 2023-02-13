@@ -1,6 +1,6 @@
 #pragma once
 
-#include "math_headers.h"
+#include <glm/glm.hpp>
 
 struct hit_record {
   glm::vec3 p;

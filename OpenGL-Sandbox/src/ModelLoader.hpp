@@ -22,20 +22,20 @@ public:
   void ProcessMesh(aiMesh* mesh, const aiScene* kScene);
 
   template<typename Vec>
-  std::pair<Vec,Vec>GetExtents(const Vec* pts, size_t stride, size_t count);
+  std::pair<Vec, Vec>GetExtents(const Vec* pts, size_t stride, size_t count);
 
   template<typename Vec>
   void CenterAndScale(Vec* pts, size_t stride, size_t count, const typename Vec::value_type& size);
 
 
   std::vector<Texture> LoadMaterialTextures(
-     aiMaterial* mat,
-     aiTextureType type,
-     std::string typeName);
+    aiMaterial* mat,
+    aiTextureType type,
+    std::string typeName);
   unsigned int TextureFromFile(const std::string& path, const std::string& directory, bool gamma);
   const aiScene* getScene() { return kScene; }
   std::unique_ptr<Mesh> meshes_;
- private:
+private:
   std::vector<Texture> textures_loaded_;
   std::string directory_;
   const aiScene* kScene;

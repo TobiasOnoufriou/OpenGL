@@ -12,6 +12,18 @@ LineTools::LineTools() {
 
 }
 
+LineTools::LineTools(glm::vec3 cam_pos) {
+  std::cout << "Debug tool init" << std::endl;
+  shader_ = GLCore::Utils::Shader::FromGLSLTextFiles(
+    "src/shaders/debug_vertex.vs",
+    "src/shaders/debug_fragment.fs"
+  );
+  model_ = glm::mat4(1.0f);
+  glm::vec3 cam_pos_offset = cam_pos;
+  cam_pos_offset.x += 1.0f;
+  this->InitLine(cam_pos, cam_pos_offset, glm::mat4(1.0f));
+}
+
 void LineTools::InitLine(glm::vec3 min_vec,glm::vec3 max_vec, glm::mat4 model) {
   //Min line vector.
   line_vertices[0] = min_vec.x;

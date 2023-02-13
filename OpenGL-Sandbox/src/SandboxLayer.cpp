@@ -33,20 +33,17 @@ void SandboxLayer::OnAttach()
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   model_loader_ = std::make_unique<ModelLoader>();// std::make_unique<ModelLoader>("src/assets/backpack.obj", false);
-  // Scene should also be returned to access the the right node, maybe storing each mesh into a hash map.  
-  line_ = std::make_unique<LineTools>();
+  // Scene should also be returned to access the the right node, maybe storing each mesh into a hash map.
+
+  line_ = std::make_unique<LineTools>(this->camera_controller_.GetCamera().GetPosition());
   mesh_ = std::move(model_loader_->LoadModel("src/assets/monkey.obj"));
   plane_ = std::move(model_loader_->LoadModel("src/assets/Plane.obj"));
+  m_sim = std::make_unique<Simulation>();
 
   this->kScene = model_loader_->getScene();
 
   this->mesh_->TranslateShape(glm::vec3(0.0f, 0.0f, 0.0f));
   plane_->TranslateShape(glm::vec3(0.0f, -1.0f, 0.0f));
-
-
-  // Mesh push back after creation within sandbox layer.
-  // In this function all call for model and file name is needed
-	// Init here
 }
 
 void SandboxLayer::OnDetach()
@@ -62,6 +59,7 @@ void SandboxLayer::OnEvent(Event& event)
     [&](MouseButtonPressedEvent& e)
     {
       // BELOW DOESN'T EVEN WORK BECAUSE IT DOESN'T ALLIGN WITH MY TYPE OF INTERSECTION.
+      // MAYBE FOR NOW FORGET MOUSE PICKING AND ADD 
       // Add here to send a Ray out.
       //camera_controller_.GetCamera().GetPosition()
       float x = (2.0f * e.GetMouseX()) / width - 1.0f;
@@ -73,25 +71,17 @@ void SandboxLayer::OnEvent(Event& event)
 
       glm::vec4 ray_eye = glm::inverse(camera_controller_.GetCamera().GetProjectionMatrix()) * ray_clip;
       ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0f, 1.0f);
-      glm::vec3 ray_wor = glm::vec3(glm::inverse(camera_controller_.GetCamera().GetViewMatrix()) * -ray_eye);
+      glm::vec3 ray_wor = glm::vec3(glm::inverse(camera_controller_.GetCamera().GetViewMatrix()) * ray_eye);
+      //ray_wor = glm::normalize(ray_wor);
       glm::mat4 model(1.0f);
       
-      //model = glm::rotate(model, glm::radians(angleBetween( camera_controller_.GetCamera().GetUp(), camera_controller_.GetCamera().GetRight(), camera_controller_.GetCamera().GetPosition())), glm::vec3(1.0f, 1.0f, 0.0f));
+      //model = glm::rotate(model, glm::radians(angleBetween( camera_controller_.GetCamera().GetUp(), camera_controller_.GetCamera().GetRight(), camera_controller_.GetCamera().GetPosition())), glm::vec3(1.0f, 1.0f, 0.0f))
 
-
-      glm::vec4 ray_dir = glm::vec4(ray_wor.x, ray_wor.y, ray_wor.z, 0.0f);
-
-      
-      // Somewhere below is where ray is fucked. It needs to take in the account the direction of the camera
-      ray_wor = glm::inverse(camera_controller_.GetCamera().GetViewMatrix()) * ray_dir;
-
-
-      line_->InitLine(ray_dir,ray_wor,model);
+      line_->InitLine(camera_controller_.GetCamera().GetPosition() * glm::vec3(0.0f, 0.0f, 0.5f), ray_wor * 100.0f, model);
      
-      if (mesh_->intersectionTest(ray_dir, ray_wor)) {
+      if (mesh_->intersectionTest(camera_controller_.GetCamera().GetPosition(), ray_wor * 100.0f)) {
         std::cout << "hit" << std::endl;
       }
-      
       //mesh_->TranslateShape();
 
       //ModelLoader load;
@@ -100,8 +90,6 @@ void SandboxLayer::OnEvent(Event& event)
     });
 	// Events here
 }
-
-// TODO: Create a DebugShader
 
 void SandboxLayer::OnUpdate(Timestep ts)
 {
@@ -116,11 +104,18 @@ void SandboxLayer::OnUpdate(Timestep ts)
 
 
   this->mesh_->DrawBoundingBox(this->camera_controller_);
+  this->plane_->DrawBoundingBox(this->camera_controller_);
   this->mesh_->Draw(this->camera_controller_);
   this->plane_->Draw(this->camera_controller_);
   this->line_->DrawDebugLine(this->camera_controller_);
+
+  //this->m_sim->Update();
 }
+
+bool* runSim = false;
 
 void SandboxLayer::OnImGuiRender() {
 	// ImGui here
+  ImGui::Begin("Options");
+  ImGui::End();
 }

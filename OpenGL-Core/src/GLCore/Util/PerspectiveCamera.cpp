@@ -31,13 +31,10 @@ namespace GLCore::Utils {
 	void PerspecitiveCamera::RecalculateViewMatrix()
 	{
     float r_head = glm::radians(m_Head), r_pitch = glm::radians(m_Pitch);
-    m_Position.x = m_LookAt.x + m_Eye_Distance * glm::cos(r_head) * glm::cos(r_pitch);
-    m_Position.y = m_LookAt.y + m_Eye_Distance * glm::sin(r_head);
-    m_Position.z = m_LookAt.z + m_Eye_Distance * glm::cos(r_head) * glm::sin(r_pitch);
-
     m_Up = glm::vec3(0.0f, (glm::cos(r_head) > 0.0) ? 1.0f : -1.0, 0.0);
-    m_ViewMatrix = glm::lookAt(m_Position, m_LookAt, m_Up);
 
+    m_ViewMatrix = glm::lookAt(m_Position, m_Position + m_Direction, m_Up);
+    
     m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
 	}
 

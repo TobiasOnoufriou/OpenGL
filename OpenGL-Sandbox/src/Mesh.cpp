@@ -26,17 +26,23 @@ Mesh::Mesh(std::vector<Vertex> vertices,
   Scale_ = glm::vec3(1.0f, 1.0f, 1.0f);
   Position_ = glm::vec3(0.0f, 0.0f, 1.0f);
   collider = true;
-
 }
 
 Mesh::~Mesh() {
 
 }
 
+void Mesh::ComputeNormal() {
+  glm::vec3 zero(0.0);
+  for (std::vector<Vertex>::iterator n = vertices_.begin(); n != vertices_.end(); ++n) {
+
+  }
+}
+
 
 void Mesh::ChangeVertexPosition(glm::vec3 pos, int index) {
   this->vertices_.at(0).position *= pos;
-  //current_positions_ *= GLM2Eigen(pos);
+  //m_current_positions *= GLM2Eigen(pos);
 }
 
 void Mesh::TranslateShape(glm::vec3 translation) {
@@ -65,38 +71,28 @@ void Mesh::CalculateBoundingVolume() {
     pMin = glm::min(pMin, this->vertices_[i].position);
     pMax = glm::max(pMax, this->vertices_[i].position);
   }
-
-  std::cout << "Max: " << std::endl;
-  std::cout << pMax.x << std::endl;
-  std::cout << pMax.y << std::endl;
-  std::cout << pMax.z << std::endl;
-
-  std::cout << "Min: " << std::endl;
-  std::cout << pMin.x << std::endl;
-  std::cout << pMin.y << std::endl;
-  std::cout << pMin.z << std::endl;
 }
 
 //Generation for 3D meshes.
 void Mesh::GenerateParticleList(unsigned int system_dimension, unsigned int vertex) {
-  system_dimension_ = system_dimension;
+  m_system_dimension = system_dimension;
 
-  current_positions_.resize(system_dimension_);
-  current_velocities_.resize(system_dimension_);
-  mass_matrix_.resize(system_dimension_, system_dimension_);
-  inv_mass_matrix_.resize(system_dimension_, system_dimension_);
-  identity_matrix_.resize(system_dimension_, system_dimension_);
+  m_current_positions.resize(m_system_dimension);
+  m_current_velocities.resize(m_system_dimension);
+  m_mass_matrix.resize(m_system_dimension, m_system_dimension);
+  inv_mass_matrix_.resize(m_system_dimension, m_system_dimension);
+  identity_matrix_.resize(m_system_dimension, m_system_dimension);
 
   mass_matrix_1d_.resize(vertex,vertex);
   identity_matrix_1d_.resize(vertex, vertex);
 
-  current_positions_.setZero();
+  m_current_positions.setZero();
 
   for (unsigned int index = 0; index < vertices_.size(); ++index) {
-    current_positions_.block_vector(index) = GLM2Eigen(vertices_[index].position);
+    m_current_positions.block_vector(index) = GLM2Eigen(vertices_[index].position);
   }
 
-  current_velocities_.setZero();
+  m_current_velocities.setZero();
 
   // Assign mass matrix and an equally sized identity matrix
   std::vector<SparseMatrixTriplet> i_triplets;
@@ -105,13 +101,13 @@ void Mesh::GenerateParticleList(unsigned int system_dimension, unsigned int vert
   i_triplets.clear();
   m_triplets.clear();
   ScalarType inv_unit_mass = 1.0 / 1.0f;
-  for (unsigned int index = 0; index < system_dimension_; index++)
+  for (unsigned int index = 0; index < m_system_dimension; index++)
   {
     i_triplets.push_back(SparseMatrixTriplet(index, index, 1));
     m_triplets.push_back(SparseMatrixTriplet(index, index, 1.0f));
     m_inv_triplets.push_back(SparseMatrixTriplet(index, index, inv_unit_mass));
   }
-  mass_matrix_.setFromTriplets(m_triplets.begin(), m_triplets.end());
+  m_mass_matrix.setFromTriplets(m_triplets.begin(), m_triplets.end());
   inv_mass_matrix_.setFromTriplets(m_inv_triplets.begin(), m_inv_triplets.end());
   identity_matrix_.setFromTriplets(i_triplets.begin(), i_triplets.end());
   m_triplets.clear();
@@ -123,7 +119,6 @@ void Mesh::GenerateParticleList(unsigned int system_dimension, unsigned int vert
   }
   mass_matrix_1d_.setFromTriplets(m_triplets.begin(), m_triplets.end());
   identity_matrix_1d_.setFromTriplets(i_triplets.begin(), i_triplets.end());
-  
 }
 
 
@@ -178,30 +173,11 @@ void Mesh::DrawBoundingBox(GLCore::Utils::PerspectiveCameraController cam) {
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-
-
-  /*GLuint attribute_v_coord;
-  glGenVertexArrays(1, &attribute_v_coord);
-  glBindVertexArray(attribute_v_coord);
-
-
-  glVertexAttribPointer(
-    attribute_v_coord,
-    4,
-    GL_FLOAT,
-    GL_FALSE,
-    0,
-    0
-  );
-  glEnableVertexAttribArray(attribute_v_coord);*/
   glBindBuffer(GL_ARRAY_BUFFER, vbo_vertices);
 
 
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, (void*)0);
-
-  /*glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat)*4, (void*)offsetof(Vertex, normal));*/
 
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo_elements);
@@ -210,7 +186,6 @@ void Mesh::DrawBoundingBox(GLCore::Utils::PerspectiveCameraController cam) {
   glDrawElements(GL_LINES, 8, GL_UNSIGNED_SHORT, (GLvoid*)(8 * sizeof(GLushort)));
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  //glDisableVertexAttribArray(attribute_v_coord);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glDeleteBuffers(1, &vbo_vertices);
@@ -230,7 +205,7 @@ void Mesh::SetupMesh() {
 
   //std::cout << vertices_.at(1).position.x << std::endl;
   //for (unsigned int i = 0; i < vertices_.size(); ++i) {
-    //vertices_[i].position = glm::vec3(current_positions_[3 * i + 0], current_positions_[3 * i + 1], current_positions_[3 * i + 2]);
+    //vertices_[i].position = glm::vec3(m_current_positions[3 * i + 0], m_current_positions[3 * i + 1], m_current_positions[3 * i + 2]);
   //}
 
   glBindBuffer(GL_ARRAY_BUFFER, vbo_);

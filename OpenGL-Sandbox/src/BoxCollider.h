@@ -26,3 +26,5 @@ protected:
   glm::vec3 c;
   bool collider; // turns on and off the collider
 };
+
+// TODO: Add OBB Bounding Box;

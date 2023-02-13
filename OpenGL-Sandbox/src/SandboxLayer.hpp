@@ -5,7 +5,7 @@
 
 #include "ModelLoader.hpp"
 #include "LineTools.h"
-#include "Ray.h"
+#include "Simulation.h"
 
 
 class SandboxLayer : public GLCore::Layer
@@ -24,6 +24,8 @@ private:
   std::unique_ptr<Mesh> mesh_;
   std::unique_ptr<Mesh> plane_;
   std::unique_ptr<LineTools> line_;
+
+  std::unique_ptr<Simulation> m_sim;
 
   const aiScene* kScene; // Current Scene.
   

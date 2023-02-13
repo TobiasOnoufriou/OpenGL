@@ -39,9 +39,9 @@ namespace GLCore::Utils {
 		glm::vec3 m_CameraPosition = { 0.0f, 0.0f, 0.0f };
     glm::vec3 direction = {};
     float horizontal_angle_ = 0.0f, vertical_angle_ = 0.0f;
-    float mouse_speed_ = 0.000005f;
+    float mouse_speed_ = 0.00001f;
 		float m_CameraRotation = 0.0f; //In degrees, in the anti-clockwise direction
-		float m_CameraTranslationSpeed = 5.0f, m_CameraRotationSpeed = 180.0f;
+		float m_CameraTranslationSpeed = 100.0f, m_CameraRotationSpeed = 180.0f;
 	};
 
 }

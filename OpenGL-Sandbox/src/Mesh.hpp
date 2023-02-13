@@ -5,7 +5,6 @@
 #include <GLCoreUtils.h>
 
 
-#include "math_headers.h"
 #include "hittable.h"
 #include "BoxCollider.h"
 
@@ -14,6 +13,9 @@
 #include <string>
 #include <vector>
 #include <math.h>
+
+#define minI(x, y) ((x) < (y) ? (x) : (y))
+#define maxI(x, y) ((x) > (y) ? (x) : (y))
 
 struct Vertex {
   glm::vec3 position;
@@ -27,6 +29,11 @@ struct Texture {
   unsigned int id;
   std::string type;
   std::string path;
+};
+
+struct Edge {
+  unsigned int m_v1, m_v2; // indices of endpoint vertices
+  unsigned int m_tri1, m_tri2; // indices of adjacent faces
 };
 
 // Mesh would inherit a collider and material
@@ -43,53 +50,48 @@ public:
   void Draw(GLCore::Utils::PerspectiveCameraController camera);
   void ChangeVertexPosition(glm::vec3 pos, int index);
   void GenerateParticleList(unsigned int system_dimension, unsigned int vertex);
+  void GenerateEdgeList();
   bool intersectionTest(glm::vec3 origin, glm::vec3 dir) {
-    //float tmin = -INFINITY, tmax = INFINITY;
-    float dir_inv = 1.0f / dir.x;
+    float tmin = 0.0, tmax = INFINITY;
+    
+    for (int i = 0; i < 3; ++i) {
+      float t1 = (pMin[i],- origin[i]) * (dir[i]);
+      float t2 = (pMax[i] - origin[i]) * (dir[i]);
 
-
-    float t1 = (pMin.x - origin.x) * dir_inv;
-    float t2 = (pMax.x - origin.x) * dir_inv;
-
-    float tmin = std::min(t1, t2);
-    float tmax = std::max(t1, t2);
-
-
-    for (auto i = 1; i < 3; ++i) {
-      dir_inv = 1.0f / dir[i];
-      t1 = (pMin[i] - origin[i]) * dir_inv;
-      t2 = (pMax[i] - origin[i]) * dir_inv;
-
-
-      tmin = std::max(tmin, std::min(t1, t2));
-      tmax = std::max(tmax, std::min(t1, t2));
+      tmin = maxI(tmin, minI(t1, t2));
+      tmax = minI(tmax, maxI(t1, t2));
     }
-    return tmax > std::max(tmin, 0.0f) ? true : false;
+
+    return tmin < tmax;
 
   }
   void TranslateShape(glm::vec3 translation);
   void SetupMesh();
+  void ComputeNormal();
   virtual void CalculateBoundingVolume() override;
   virtual void DrawBoundingBox(GLCore::Utils::PerspectiveCameraController cam) override;
 
 
   bool GetCollider() { return collider; }
 
- private:
+  unsigned int m_system_dimension;
+
+
+ public:
   std::vector<Vertex> vertices_;
   std::vector<GLuint> indices_;
   std::vector<Texture> textures_;
 
-  VectorX current_positions_;
-  VectorX current_velocities_;
-  SparseMatrix mass_matrix_;
+  VectorX m_current_positions;
+  VectorX m_current_velocities;
+  SparseMatrix m_mass_matrix;
   SparseMatrix inv_mass_matrix_;
   SparseMatrix identity_matrix_;
 
   SparseMatrix mass_matrix_1d_;
   SparseMatrix identity_matrix_1d_;
 
-  unsigned int system_dimension_;
+  std::vector<Edge> m_edge_list;
 
   //Scale and Position
   glm::vec3 Scale_, Position_;
